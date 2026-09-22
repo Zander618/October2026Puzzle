@@ -4,13 +4,75 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>My Site</title>
+  <title>October 2026 Puzzle</title>
 
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-  <h1>Hello World</h1>
+
+  <main class="quiz-container">
+
+    <header class="quiz-header">
+      <div class="pumpkin">🎃</div>
+      <h1>October Puzzle</h1>
+      <p>Answer the questions... if you dare.</p>
+    </header>
+
+    <form id="quiz-form">
+
+      <section class="question">
+        <label for="question-1">
+          <span class="question-number">01</span>
+          How many ghosts are in this room?
+        </label>
+
+        <input
+          type="text"
+          id="question-1"
+          name="question1"
+          placeholder="Enter your answer"
+          autocomplete="off"
+        >
+      </section>
+
+      <section class="question">
+        <label for="question-2">
+          <span class="question-number">02</span>
+          How many dogs are in the cage in <em>The Thing</em>?
+        </label>
+
+        <input
+          type="text"
+          id="question-2"
+          name="question2"
+          placeholder="Enter your answer"
+          autocomplete="off"
+        >
+      </section>
+
+      <section class="question">
+        <label for="question-3">
+          <span class="question-number">03</span>
+          What is the name of the demon in <em>Hereditary</em>?
+        </label>
+
+        <input
+          type="text"
+          id="question-3"
+          name="question3"
+          placeholder="Enter your answer"
+          autocomplete="off"
+        >
+      </section>
+
+      <button type="submit">Submit Answers</button>
+
+    </form>
+
+    <p id="result"></p>
+
+  </main>
 
   <script src="script.js"></script>
 </body>

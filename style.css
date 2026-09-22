@@ -1,5 +1,157 @@
-/* style.css */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+}
 
 body {
+  margin: 0;
+  min-height: 100vh;
+
+  background:
+    radial-gradient(circle at top, #26142f 0%, #100b14 45%, #070608 100%);
+
+  color: #f4eee6;
+
+  font-family:
+    "Trebuchet MS",
+    Arial,
+    sans-serif;
+}
+
+.quiz-container {
+  width: 100%;
+  max-width: 500px;
+  min-height: 100vh;
+
+  margin: 0 auto;
+  padding: 40px 20px 60px;
+}
+
+.quiz-header {
+  text-align: center;
+  margin-bottom: 45px;
+}
+
+.pumpkin {
+  font-size: 3rem;
+  margin-bottom: 10px;
+}
+
+.quiz-header h1 {
+  margin: 0;
+
+  color: #ff7518;
+
+  font-family: Georgia, serif;
+  font-size: 2.4rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+
+  text-shadow:
+    0 0 8px rgba(255, 117, 24, 0.4);
+}
+
+.quiz-header p {
+  margin-top: 10px;
+
+  color: #aaa0ad;
+  font-size: 0.95rem;
+}
+
+.question {
+  margin-bottom: 35px;
+}
+
+.question label {
+  display: block;
+
+  margin-bottom: 12px;
+
+  font-family: Georgia, serif;
+  font-size: 1.15rem;
+  line-height: 1.5;
+}
+
+.question-number {
+  display: block;
+
+  margin-bottom: 5px;
+
+  color: #ff7518;
+
   font-family: Arial, sans-serif;
+  font-size: 0.75rem;
+  font-weight: bold;
+  letter-spacing: 2px;
+}
+
+.question input {
+  width: 100%;
+
+  padding: 15px 14px;
+
+  background: #151218;
+
+  border: 1px solid #45394b;
+  border-radius: 4px;
+
+  color: #ffffff;
+
+  font-size: 1rem;
+
+  outline: none;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.question input::placeholder {
+  color: #6f6672;
+}
+
+.question input:focus {
+  border-color: #ff7518;
+
+  box-shadow:
+    0 0 0 2px rgba(255, 117, 24, 0.15);
+}
+
+button {
+  width: 100%;
+
+  margin-top: 10px;
+  padding: 16px;
+
+  background: #ff7518;
+
+  border: none;
+  border-radius: 4px;
+
+  color: #140b08;
+
+  font-size: 1rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+
+  cursor: pointer;
+}
+
+button:hover {
+  background: #ff8c38;
+}
+
+button:active {
+  transform: translateY(1px);
+}
+
+#result {
+  margin-top: 25px;
+
+  text-align: center;
+  font-size: 1rem;
 }
