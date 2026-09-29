@@ -333,3 +333,33 @@ button:active {
     padding: 16px;
   }
 }
+
+.question input.correct {
+  border-color: #56b870;
+
+  box-shadow:
+    0 0 0 2px rgba(86, 184, 112, 0.15);
+}
+
+.question input.incorrect {
+  border-color: #c84b4b;
+
+  box-shadow:
+    0 0 0 2px rgba(200, 75, 75, 0.15);
+}
+
+.answer-feedback {
+  min-height: 20px;
+
+  margin: 8px 0 0;
+
+  font-size: 0.8rem;
+}
+
+.answer-feedback.correct {
+  color: #74ce8c;
+}
+
+.answer-feedback.incorrect {
+  color: #df6a6a;
+}

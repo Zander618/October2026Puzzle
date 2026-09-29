@@ -125,6 +125,81 @@ const questions = [
   }
 ];
 
+const correctAnswers = {
+  1: ["Elmo"],
+  2: ["Spooky"],
+
+  3: ["5", "five"],
+  4: ["21", "twenty one"],
+
+  // 5 = maze
+
+  6: ["Pazuzu"],
+  7: ["Ted Bundy"],
+
+  8: ["Me", "Hayley"],
+
+  9: ["Dimetrodon"],
+
+  10: ["10", "ten"],
+  11: ["12", "twelve"],
+
+  // 12 = maze
+
+  13: ["The Idiot"],
+  14: ["Texas Chain Saw Massacre"],
+
+  15: ["Purple"],
+
+  16: ["Dorian A Sirna"],
+
+  17: ["4", "four"],
+  18: ["5", "five"],
+
+  // 19 = maze
+
+  // Room number — words are NOT accepted here
+  20: ["237"],
+
+  21: ["Cenobites"],
+  22: ["Red"],
+  23: ["Head"],
+
+  24: ["4", "four"],
+  25: ["12", "twelve"],
+
+  // 26 = maze
+
+  27: ["Necronomicon"],
+  28: ["Deathgasm"],
+  29: ["The Faculty"],
+
+  30: ["Dead Alive", "Evil Dead"]
+};
+
+function normalizeAnswer(value) {
+  return value
+    .toLowerCase()
+    .replace(/\s+/g, "");
+}
+
+function isAnswerCorrect(questionNumber, userAnswer) {
+  const acceptedAnswers = correctAnswers[questionNumber];
+
+  if (!acceptedAnswers) {
+    return false;
+  }
+
+  const normalizedUserAnswer =
+    normalizeAnswer(userAnswer);
+
+  return acceptedAnswers.some(
+    (answer) =>
+      normalizeAnswer(answer) ===
+      normalizedUserAnswer
+  );
+}
+
 const questionsContainer =
   document.querySelector("#questions");
 
@@ -282,11 +357,20 @@ function renderTextQuestion(question) {
     }
   );
 
-  section.appendChild(label);
+const feedback =
+  document.createElement("p");
 
-  section.appendChild(input);
+feedback.className =
+  "answer-feedback";
 
-  questionsContainer.appendChild(section);
+section.appendChild(label);
+section.appendChild(input);
+section.appendChild(feedback);
+
+questionsContainer.appendChild(section);
+
+
+
 }
 
 /* ================================
@@ -1075,8 +1159,106 @@ quizForm.addEventListener(
 
     saveProgress();
 
+    let correctCount = 0;
+    let answeredCount = 0;
+
+    questions.forEach((question) => {
+
+      /*
+        Maze questions
+      */
+      if (question.type === "maze") {
+
+        if (
+          progress.mazes[
+            question.number
+          ]
+        ) {
+          correctCount++;
+          answeredCount++;
+        }
+
+        return;
+      }
+
+      const input =
+        document.querySelector(
+          `#question-${question.number}`
+        );
+
+      const feedback =
+        input.parentElement.querySelector(
+          ".answer-feedback"
+        );
+
+      const userAnswer =
+        input.value.trim();
+
+      /*
+        Nothing entered
+      */
+      if (!userAnswer) {
+
+        input.classList.remove(
+          "correct",
+          "incorrect"
+        );
+
+        feedback.className =
+          "answer-feedback";
+
+        feedback.textContent =
+          "";
+
+        return;
+      }
+
+      answeredCount++;
+
+      const correct =
+        isAnswerCorrect(
+          question.number,
+          userAnswer
+        );
+
+      if (correct) {
+
+        correctCount++;
+
+        input.classList.remove(
+          "incorrect"
+        );
+
+        input.classList.add(
+          "correct"
+        );
+
+        feedback.className =
+          "answer-feedback correct";
+
+        feedback.textContent =
+          "Correct 🎃";
+
+      } else {
+
+        input.classList.remove(
+          "correct"
+        );
+
+        input.classList.add(
+          "incorrect"
+        );
+
+        feedback.className =
+          "answer-feedback incorrect";
+
+        feedback.textContent =
+          "Not quite...";
+      }
+    });
+
     result.textContent =
-      "Your progress has been saved on this device. 🎃";
+      `${correctCount} of 30 completed correctly.`;
   }
 );
 
