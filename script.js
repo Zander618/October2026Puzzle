@@ -259,25 +259,19 @@ function saveProgress() {
 }
 
 function updateProgressDisplay() {
+
   let completed = 0;
 
-  questions.forEach((question) => {
+  questions.forEach(
+    (question) => {
 
-    if (question.type === "maze") {
-      if (progress.mazes[question.number]) {
+      if (
+        isQuestionComplete(question)
+      ) {
         completed++;
       }
-
-      return;
     }
-
-    const answer =
-      progress.answers[question.number];
-
-    if (answer && answer.trim()) {
-      completed++;
-    }
-  });
+  );
 
   progressDisplay.textContent =
     `${completed} / ${questions.length} completed`;
@@ -287,15 +281,113 @@ function updateProgressDisplay() {
    RENDER QUESTIONS
 ================================ */
 
-questions.forEach((question) => {
+const PUZZLE_YEAR = 2026;
+const PUZZLE_MONTH = 9; // JavaScript months start at 0, so 9 = October
+
+function hasQuestionDateArrived(questionNumber) {
+  const now = new Date();
+
+  const unlockDate = new Date(
+    PUZZLE_YEAR,
+    PUZZLE_MONTH,
+    questionNumber,
+    0,
+    0,
+    0
+  );
+
+  return now >= unlockDate;
+}
+
+function isQuestionComplete(question) {
 
   if (question.type === "maze") {
-    renderMazeQuestion(question);
-  } else {
-    renderTextQuestion(question);
+    return Boolean(
+      progress.mazes[question.number]
+    );
   }
 
-});
+  const answer =
+    progress.answers[question.number] ?? "";
+
+  return isAnswerCorrect(
+    question.number,
+    answer
+  );
+}
+
+function canShowQuestion(question) {
+
+  /*
+    The calendar date must have arrived.
+  */
+
+  if (!hasQuestionDateArrived(question.number)) {
+    return false;
+  }
+
+  /*
+    Question 1 has no previous question.
+  */
+
+  if (question.number === 1) {
+    return true;
+  }
+
+  const previousQuestion =
+    questions.find(
+      (item) =>
+        item.number === question.number - 1
+    );
+
+  return isQuestionComplete(
+    previousQuestion
+  );
+}
+
+function renderAvailableQuestions() {
+
+  /*
+    Start fresh so locked questions disappear
+    if an earlier answer is changed.
+  */
+
+  questionsContainer.innerHTML = "";
+
+  mazeGames.clear();
+
+  activeMaze = null;
+
+  for (const question of questions) {
+
+    /*
+      IMPORTANT:
+      Stop at the first locked question.
+
+      This prevents someone from jumping
+      farther ahead even if old saved data
+      exists.
+    */
+
+    if (!canShowQuestion(question)) {
+      break;
+    }
+
+    if (question.type === "maze") {
+
+      renderMazeQuestion(question);
+
+    } else {
+
+      renderTextQuestion(question);
+
+    }
+  }
+
+  updateProgressDisplay();
+}
+
+renderAvailableQuestions();
 
 function renderTextQuestion(question) {
 
@@ -347,15 +439,46 @@ function renderTextQuestion(question) {
   input.value =
     progress.answers[question.number] ?? "";
 
-  input.addEventListener(
-    "input",
-    () => {
-      progress.answers[question.number] =
-        input.value;
+input.addEventListener(
+  "input",
+  () => {
 
-      saveProgress();
+    progress.answers[question.number] =
+      input.value;
+
+    saveProgress();
+
+    /*
+      If the answer is now correct AND
+      tomorrow's/day's question is already
+      allowed by the calendar, reveal it.
+    */
+
+    if (
+      isAnswerCorrect(
+        question.number,
+        input.value
+      )
+    ) {
+
+      const nextQuestion =
+        questions.find(
+          (item) =>
+            item.number ===
+            question.number + 1
+        );
+
+      if (
+        nextQuestion &&
+        hasQuestionDateArrived(
+          nextQuestion.number
+        )
+      ) {
+        renderAvailableQuestions();
+      }
     }
-  );
+  }
+);
 
 const feedback =
   document.createElement("p");
@@ -1074,27 +1197,52 @@ function moveMazePlayer(
   game.player.y =
     newY;
 
+ if (
+  newX === game.exit.x &&
+  newY === game.exit.y
+) {
+
+  game.completed =
+    true;
+
+  progress.mazes[
+    questionNumber
+  ] = true;
+
+  game.status.textContent =
+    "Escaped! 🎃";
+
+  game.status
+    .classList
+    .add("completed");
+
+  saveProgress();
+
+  const nextQuestion =
+    questions.find(
+      (item) =>
+        item.number ===
+        questionNumber + 1
+    );
+
+  /*
+    If the next day's date has already
+    arrived, reveal it immediately.
+  */
+
   if (
-    newX === game.exit.x &&
-    newY === game.exit.y
+    nextQuestion &&
+    hasQuestionDateArrived(
+      nextQuestion.number
+    )
   ) {
 
-    game.completed =
-      true;
-
-    progress.mazes[
-      questionNumber
-    ] = true;
-
-    game.status.textContent =
-      "Escaped! 🎃";
-
-    game.status
-      .classList
-      .add("completed");
-
-    saveProgress();
+    setTimeout(
+      renderAvailableQuestions,
+      600
+    );
   }
+}
 
   drawMaze(game);
 }
