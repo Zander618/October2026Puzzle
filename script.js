@@ -5,7 +5,7 @@ const questions = [
   },
   {
     number: 2,
-    text: "There are many where you lie down. One is not the same inside is the answer."
+    text: "There are many where you lie down. One is not the same. Turn me around. What are those?"
   },
   {
     number: 3,
@@ -127,10 +127,10 @@ const questions = [
 
 const correctAnswers = {
   1: ["Elmo"],
-  2: ["Spooky"],
+  2: ["Initials"],
 
   3: ["5", "five"],
-  4: ["21", "twenty one"],
+  4: ["15", "fifteen"],
 
   // 5 = maze
 
