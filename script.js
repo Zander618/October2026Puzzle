@@ -129,7 +129,7 @@ const correctAnswers = {
   1: ["Elmo"],
   2: ["Initials"],
 
-  3: ["5", "five"],
+  3: ["10", "ten"],
   4: ["15", "fifteen"],
 
   // 5 = maze
