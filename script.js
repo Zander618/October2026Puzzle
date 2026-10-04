@@ -13,7 +13,7 @@ const questions = [
   },
   {
     number: 4,
-    text: "Find em weekend: How many ghosts are there?"
+    text: "Find em weekend: How many ghosts are there? (Kitchen Only)"
   },
   {
     number: 5,
