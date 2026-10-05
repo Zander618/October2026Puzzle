@@ -821,13 +821,15 @@ function generateMaze(
 /* ================================
    CREATE GAME
 ================================ */
-
 function createMaze(
   questionNumber,
   canvas,
   status
 ) {
 
+  /*
+    Make the first maze larger/harder.
+  */
   const columns =
     questionNumber === 5
       ? 21
@@ -841,6 +843,10 @@ function createMaze(
   const cellSize =
     canvas.width / columns;
 
+  /*
+    Each Monday gets a different,
+    repeatable maze.
+  */
   const seed =
     20261000 +
     questionNumber * 731;
@@ -851,7 +857,74 @@ function createMaze(
       rows,
       seed
     );
+
+  /*
+    Check whether this maze was
+    already completed previously.
+  */
+  const completed =
+    Boolean(
+      progress.mazes[
+        questionNumber
+      ]
+    );
+
+  /*
+    Create the actual game object.
+  */
+  const game = {
+    questionNumber,
+    canvas,
+    status,
+    grid,
+    columns,
+    rows,
+    cellSize,
+
+    player: completed
+      ? {
+          x: columns - 2,
+          y: rows - 2
+        }
+      : {
+          x: 1,
+          y: 1
+        },
+
+    exit: {
+      x: columns - 2,
+      y: rows - 2
+    },
+
+    completed
+  };
+
+  /*
+    If already completed,
+    show the completed state.
+  */
+  if (completed) {
+
+    status.textContent =
+      "Escaped! 🎃";
+
+    status.classList.add(
+      "completed"
+    );
   }
+
+  /*
+    Actually draw the maze.
+  */
+  drawMaze(game);
+
+  /*
+    This is important because
+    renderMazeQuestion stores this
+    object inside mazeGames.
+  */
+  return game;
+}
 
 /* ================================
    DRAW MAZE
