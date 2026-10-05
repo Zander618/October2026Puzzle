@@ -537,7 +537,7 @@ function renderMazeQuestion(question) {
     "maze-instructions";
 
   instructions.textContent =
-    "Guide the pumpkin pixel to the ghost. Use the arrow keys, WASD, or the buttons below.";
+    "Guide the pumpkin pixel to the ghost. Use the buttons below.";
 
   const wrapper =
     document.createElement("div");
@@ -550,9 +550,20 @@ function renderMazeQuestion(question) {
 
   canvas.className =
     "maze-canvas";
+if (question.number === 5) {
+
+  canvas.width = 420;
+  canvas.height = 420;
+
+  canvas.classList.add(
+    "first-maze"
+  );
+
+} else {
 
   canvas.width = 330;
   canvas.height = 330;
+}
 
   canvas.tabIndex = 0;
 
@@ -817,15 +828,18 @@ function createMaze(
   status
 ) {
 
-  const columns = 15;
-  const rows = 15;
+  const columns =
+    questionNumber === 5
+      ? 21
+      : 15;
+
+  const rows =
+    questionNumber === 5
+      ? 21
+      : 15;
 
   const cellSize =
     canvas.width / columns;
-
-  /*
-    Different seed for each Monday.
-  */
 
   const seed =
     20261000 +
@@ -837,55 +851,7 @@ function createMaze(
       rows,
       seed
     );
-
-  const completed =
-    Boolean(
-      progress.mazes[
-        questionNumber
-      ]
-    );
-
-  const game = {
-    questionNumber,
-    canvas,
-    status,
-    grid,
-    columns,
-    rows,
-    cellSize,
-
-    player: completed
-      ? {
-          x: columns - 2,
-          y: rows - 2
-        }
-      : {
-          x: 1,
-          y: 1
-        },
-
-    exit: {
-      x: columns - 2,
-      y: rows - 2
-    },
-
-    completed
-  };
-
-  if (completed) {
-
-    status.textContent =
-      "Escaped! 🎃";
-
-    status.classList.add(
-      "completed"
-    );
   }
-
-  drawMaze(game);
-
-  return game;
-}
 
 /* ================================
    DRAW MAZE
