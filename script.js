@@ -88,11 +88,11 @@ const questions = [
   },
   {
     number: 22,
-    text: "Unearth the mystery of the red stone"
+    text: "One is not like the others under my many arms that have grown since I left my house of food. The color?"
   },
   {
     number: 23,
-    text: "One is not like the others under my many arms that have grown since I left my house of food. The color?"
+    text: "Unearth the mystery of the red stone"
   },
   {
     number: 24,
@@ -141,7 +141,7 @@ const correctAnswers = {
 
   9: ["Dimetrodon"],
 
-  10: ["10", "ten"],
+  10: ["5", "five"],
   11: ["12", "twelve"],
 
   // 12 = maze
@@ -163,7 +163,7 @@ const correctAnswers = {
 
   21: ["Cenobites"],
   22: ["Red"],
-  23: ["Head"],
+  23: ["Big Head"],
 
   24: ["4", "four"],
   25: ["12", "twelve"],
