@@ -45,9 +45,9 @@ const questions = [
     text: "Find em weekend: How many skulls are there?"
   },
   {
-    number: 12,
-    type: "maze",
-    text: "Monday mini game"
+  number: 12,
+  type: "snake",
+  text: "Monday mini game"
   },
   {
     number: 13,
@@ -216,6 +216,7 @@ const STORAGE_KEY =
   "october-puzzle-2026";
 
 let activeMaze = null;
+let activeSnakeGame = null;
 
 const mazeGames = new Map();
 
@@ -301,7 +302,10 @@ function hasQuestionDateArrived(questionNumber) {
 
 function isQuestionComplete(question) {
 
-  if (question.type === "maze") {
+  if (
+    question.type === "maze" ||
+    question.type === "snake"
+  ) {
     return Boolean(
       progress.mazes[question.number]
     );
@@ -352,6 +356,17 @@ function renderAvailableQuestions() {
     if an earlier answer is changed.
   */
 
+    if (
+    activeSnakeGame &&
+    activeSnakeGame.timer
+  ) {
+    clearInterval(
+      activeSnakeGame.timer
+    );
+  }
+
+  activeSnakeGame = null;
+
   questionsContainer.innerHTML = "";
 
   mazeGames.clear();
@@ -372,10 +387,13 @@ function renderAvailableQuestions() {
     if (!canShowQuestion(question)) {
       break;
     }
-
     if (question.type === "maze") {
 
       renderMazeQuestion(question);
+
+    } else if (question.type === "snake") {
+
+      renderSnakeQuestion(question);
 
     } else {
 
@@ -669,6 +687,998 @@ if (question.number === 5) {
 
       canvas.focus();
     }
+  );
+}
+
+/* ================================
+   SNAKE MINI GAME
+================================ */
+
+function renderSnakeQuestion(question) {
+
+  const section =
+    document.createElement("section");
+
+  section.className =
+    "question maze-question snake-question";
+
+  const title =
+    document.createElement("div");
+
+  title.className =
+    "question-title";
+
+  const number =
+    document.createElement("span");
+
+  number.className =
+    "question-number";
+
+  number.textContent =
+    String(question.number)
+      .padStart(2, "0");
+
+  title.appendChild(number);
+
+  title.appendChild(
+    document.createTextNode(
+      question.text
+    )
+  );
+
+  const instructions =
+    document.createElement("p");
+
+  instructions.className =
+    "maze-instructions";
+
+  instructions.textContent =
+    "Feed the skeleton snake 10 pumpkins to win. Don't hit the walls or yourself.";
+
+  const score =
+    document.createElement("div");
+
+  score.className =
+    "snake-score";
+
+  const completed =
+    Boolean(
+      progress.mazes[
+        question.number
+      ]
+    );
+
+  score.textContent =
+    completed
+      ? "Pumpkins: 10 / 10"
+      : "Pumpkins: 0 / 10";
+
+  const wrapper =
+    document.createElement("div");
+
+  wrapper.className =
+    "maze-wrapper";
+
+  const canvas =
+    document.createElement("canvas");
+
+  canvas.className =
+    "snake-canvas";
+
+  canvas.width = 360;
+  canvas.height = 360;
+
+  canvas.tabIndex = 0;
+
+  wrapper.appendChild(canvas);
+
+  const controls =
+    document.createElement("div");
+
+  controls.className =
+    "maze-controls";
+
+  const controlInfo = [
+    {
+      direction: "up",
+      symbol: "▲"
+    },
+    {
+      direction: "left",
+      symbol: "◀"
+    },
+    {
+      direction: "down",
+      symbol: "▼"
+    },
+    {
+      direction: "right",
+      symbol: "▶"
+    }
+  ];
+
+  const status =
+    document.createElement("p");
+
+  status.className =
+    "maze-status";
+
+  const startButton =
+    document.createElement("button");
+
+  startButton.type =
+    "button";
+
+  startButton.className =
+    "snake-start";
+
+  startButton.textContent =
+    completed
+      ? "Completed"
+      : "Start";
+
+  startButton.disabled =
+    completed;
+
+  const game = {
+    questionNumber:
+      question.number,
+
+    canvas,
+    scoreDisplay: score,
+    status,
+    startButton,
+
+    gridSize: 18,
+    cellSize: 20,
+
+    snake: [],
+    direction: {
+      x: 1,
+      y: 0
+    },
+
+    nextDirection: {
+      x: 1,
+      y: 0
+    },
+
+    pumpkin: {
+      x: 13,
+      y: 9
+    },
+
+    score:
+      completed
+        ? 10
+        : 0,
+
+    timer: null,
+    running: false,
+    gameOver: false,
+    completed
+  };
+
+  controlInfo.forEach(
+    ({ direction, symbol }) => {
+
+      const button =
+        document.createElement(
+          "button"
+        );
+
+      button.type =
+        "button";
+
+      button.className =
+        `maze-control ${direction}`;
+
+      button.textContent =
+        symbol;
+
+      button.setAttribute(
+        "aria-label",
+        direction
+      );
+
+      button.addEventListener(
+        "click",
+        () => {
+
+          activeMaze = null;
+          activeSnakeGame = game;
+
+          changeSnakeDirection(
+            game,
+            direction
+          );
+
+          canvas.focus();
+        }
+      );
+
+      controls.appendChild(
+        button
+      );
+    }
+  );
+
+  startButton.addEventListener(
+    "click",
+    () => {
+
+      activeMaze = null;
+      activeSnakeGame = game;
+
+      startSnakeGame(game);
+
+      canvas.focus();
+    }
+  );
+
+  canvas.addEventListener(
+    "click",
+    () => {
+
+      activeMaze = null;
+      activeSnakeGame = game;
+
+      canvas.focus();
+    }
+  );
+
+  section.appendChild(title);
+  section.appendChild(instructions);
+  section.appendChild(score);
+  section.appendChild(wrapper);
+  section.appendChild(controls);
+  section.appendChild(startButton);
+  section.appendChild(status);
+
+  questionsContainer.appendChild(
+    section
+  );
+
+  if (completed) {
+
+    status.textContent =
+      "You ate 10 pumpkins! Completed 🎃";
+
+    status.classList.add(
+      "completed"
+    );
+
+    resetSnakeGame(
+      game,
+      true
+    );
+
+  } else {
+
+    status.textContent =
+      "Press Start when you're ready.";
+
+    resetSnakeGame(game);
+  }
+}
+
+
+/* ================================
+   RESET SNAKE
+================================ */
+
+function resetSnakeGame(
+  game,
+  completed = false
+) {
+
+  const middle =
+    Math.floor(
+      game.gridSize / 2
+    );
+
+  game.snake = [
+    {
+      x: middle,
+      y: middle
+    },
+    {
+      x: middle - 1,
+      y: middle
+    },
+    {
+      x: middle - 2,
+      y: middle
+    }
+  ];
+
+  game.direction = {
+    x: 1,
+    y: 0
+  };
+
+  game.nextDirection = {
+    x: 1,
+    y: 0
+  };
+
+  game.gameOver =
+    false;
+
+  if (!completed) {
+
+    game.score = 0;
+
+    game.scoreDisplay.textContent =
+      "Pumpkins: 0 / 10";
+
+    spawnPumpkin(game);
+  }
+
+  drawSnakeGame(game);
+}
+
+
+/* ================================
+   START SNAKE
+================================ */
+
+function startSnakeGame(game) {
+
+  if (
+    game.completed ||
+    game.running
+  ) {
+    return;
+  }
+
+  if (game.gameOver) {
+    resetSnakeGame(game);
+  }
+
+  game.running = true;
+
+  game.startButton.disabled =
+    true;
+
+  game.startButton.textContent =
+    "Running...";
+
+  game.status.textContent =
+    "Eat the pumpkins!";
+
+  game.timer =
+    setInterval(
+      () => {
+        updateSnakeGame(game);
+      },
+      150
+    );
+}
+
+
+/* ================================
+   CHANGE DIRECTION
+================================ */
+
+function changeSnakeDirection(
+  game,
+  direction
+) {
+
+  const directions = {
+    up: {
+      x: 0,
+      y: -1
+    },
+
+    down: {
+      x: 0,
+      y: 1
+    },
+
+    left: {
+      x: -1,
+      y: 0
+    },
+
+    right: {
+      x: 1,
+      y: 0
+    }
+  };
+
+  const next =
+    directions[direction];
+
+  if (!next) {
+    return;
+  }
+
+  /*
+    Prevent instantly reversing
+    into the snake's own body.
+  */
+  if (
+    next.x ===
+      -game.direction.x &&
+    next.y ===
+      -game.direction.y
+  ) {
+    return;
+  }
+
+  game.nextDirection = next;
+}
+
+
+/* ================================
+   UPDATE SNAKE
+================================ */
+
+function updateSnakeGame(game) {
+
+  if (!game.running) {
+    return;
+  }
+
+  game.direction = {
+    ...game.nextDirection
+  };
+
+  const currentHead =
+    game.snake[0];
+
+  const newHead = {
+    x:
+      currentHead.x +
+      game.direction.x,
+
+    y:
+      currentHead.y +
+      game.direction.y
+  };
+
+  const hitWall =
+    newHead.x < 0 ||
+    newHead.y < 0 ||
+    newHead.x >=
+      game.gridSize ||
+    newHead.y >=
+      game.gridSize;
+
+  if (hitWall) {
+
+    loseSnakeGame(game);
+
+    return;
+  }
+
+  const eatingPumpkin =
+    newHead.x ===
+      game.pumpkin.x &&
+    newHead.y ===
+      game.pumpkin.y;
+
+  /*
+    Ignore the final tail segment
+    when it is about to move away.
+  */
+  const bodyToCheck =
+    eatingPumpkin
+      ? game.snake
+      : game.snake.slice(
+          0,
+          -1
+        );
+
+  const hitSelf =
+    bodyToCheck.some(
+      (segment) =>
+        segment.x ===
+          newHead.x &&
+        segment.y ===
+          newHead.y
+    );
+
+  if (hitSelf) {
+
+    loseSnakeGame(game);
+
+    return;
+  }
+
+  game.snake.unshift(
+    newHead
+  );
+
+  if (eatingPumpkin) {
+
+    game.score++;
+
+    game.scoreDisplay.textContent =
+      `Pumpkins: ${game.score} / 10`;
+
+    if (game.score >= 10) {
+
+      winSnakeGame(game);
+
+      return;
+    }
+
+    spawnPumpkin(game);
+
+  } else {
+
+    game.snake.pop();
+  }
+
+  drawSnakeGame(game);
+}
+
+
+/* ================================
+   PUMPKIN LOCATION
+================================ */
+
+function spawnPumpkin(game) {
+
+  let pumpkin;
+
+  do {
+
+    pumpkin = {
+      x:
+        Math.floor(
+          Math.random() *
+          game.gridSize
+        ),
+
+      y:
+        Math.floor(
+          Math.random() *
+          game.gridSize
+        )
+    };
+
+  } while (
+    game.snake.some(
+      (segment) =>
+        segment.x ===
+          pumpkin.x &&
+        segment.y ===
+          pumpkin.y
+    )
+  );
+
+  game.pumpkin = pumpkin;
+}
+
+
+/* ================================
+   LOSE
+================================ */
+
+function loseSnakeGame(game) {
+
+  game.running = false;
+  game.gameOver = true;
+
+  clearInterval(
+    game.timer
+  );
+
+  game.timer = null;
+
+  game.status.textContent =
+    "The skeleton snake crashed! Tap Restart.";
+
+  game.startButton.disabled =
+    false;
+
+  game.startButton.textContent =
+    "Restart";
+}
+
+
+/* ================================
+   WIN
+================================ */
+
+function winSnakeGame(game) {
+
+  game.running = false;
+  game.completed = true;
+
+  clearInterval(
+    game.timer
+  );
+
+  game.timer = null;
+
+  progress.mazes[
+    game.questionNumber
+  ] = true;
+
+  game.scoreDisplay.textContent =
+    "Pumpkins: 10 / 10";
+
+  game.status.textContent =
+    "You ate 10 pumpkins! Completed 🎃";
+
+  game.status.classList.add(
+    "completed"
+  );
+
+  game.startButton.disabled =
+    true;
+
+  game.startButton.textContent =
+    "Completed";
+
+  drawSnakeGame(game);
+
+  saveProgress();
+
+  const nextQuestion =
+    questions.find(
+      (item) =>
+        item.number ===
+        game.questionNumber + 1
+    );
+
+  if (
+    nextQuestion &&
+    hasQuestionDateArrived(
+      nextQuestion.number
+    )
+  ) {
+
+    setTimeout(
+      renderAvailableQuestions,
+      800
+    );
+  }
+}
+
+
+/* ================================
+   DRAW SNAKE GAME
+================================ */
+
+function drawSnakeGame(game) {
+
+  const ctx =
+    game.canvas.getContext(
+      "2d"
+    );
+
+  const size =
+    game.cellSize;
+
+  ctx.clearRect(
+    0,
+    0,
+    game.canvas.width,
+    game.canvas.height
+  );
+
+  ctx.fillStyle =
+    "#080609";
+
+  ctx.fillRect(
+    0,
+    0,
+    game.canvas.width,
+    game.canvas.height
+  );
+
+  /*
+    Subtle graveyard-style grid.
+  */
+  ctx.strokeStyle =
+    "rgba(255,255,255,0.035)";
+
+  ctx.lineWidth = 1;
+
+  for (
+    let i = 0;
+    i <= game.gridSize;
+    i++
+  ) {
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+      i * size,
+      0
+    );
+
+    ctx.lineTo(
+      i * size,
+      game.canvas.height
+    );
+
+    ctx.stroke();
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+      0,
+      i * size
+    );
+
+    ctx.lineTo(
+      game.canvas.width,
+      i * size
+    );
+
+    ctx.stroke();
+  }
+
+  drawSnakePumpkin(
+    ctx,
+    game.pumpkin.x,
+    game.pumpkin.y,
+    size
+  );
+
+  /*
+    Draw bones connecting the
+    skeleton together.
+  */
+  ctx.strokeStyle =
+    "#ddd5c5";
+
+  ctx.lineWidth =
+    Math.max(
+      3,
+      size * 0.18
+    );
+
+  ctx.lineCap =
+    "round";
+
+  for (
+    let i = 0;
+    i <
+      game.snake.length - 1;
+    i++
+  ) {
+
+    const first =
+      game.snake[i];
+
+    const second =
+      game.snake[i + 1];
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+      first.x * size +
+        size / 2,
+      first.y * size +
+        size / 2
+    );
+
+    ctx.lineTo(
+      second.x * size +
+        size / 2,
+      second.y * size +
+        size / 2
+    );
+
+    ctx.stroke();
+  }
+
+  /*
+    Vertebrae.
+  */
+  game.snake.forEach(
+    (segment, index) => {
+
+      if (index === 0) {
+        return;
+      }
+
+      const centerX =
+        segment.x * size +
+        size / 2;
+
+      const centerY =
+        segment.y * size +
+        size / 2;
+
+      ctx.fillStyle =
+        "#eee7d7";
+
+      ctx.beginPath();
+
+      ctx.arc(
+        centerX,
+        centerY,
+        size * 0.22,
+        0,
+        Math.PI * 2
+      );
+
+      ctx.fill();
+
+      ctx.fillStyle =
+        "#080609";
+
+      ctx.beginPath();
+
+      ctx.arc(
+        centerX,
+        centerY,
+        size * 0.09,
+        0,
+        Math.PI * 2
+      );
+
+      ctx.fill();
+    }
+  );
+
+  drawSnakeSkull(
+    ctx,
+    game.snake[0].x,
+    game.snake[0].y,
+    size
+  );
+}
+
+
+/* ================================
+   SNAKE SKULL
+================================ */
+
+function drawSnakeSkull(
+  ctx,
+  x,
+  y,
+  size
+) {
+
+  const centerX =
+    x * size +
+    size / 2;
+
+  const centerY =
+    y * size +
+    size / 2;
+
+  ctx.fillStyle =
+    "#f4eee0";
+
+  ctx.beginPath();
+
+  ctx.arc(
+    centerX,
+    centerY,
+    size * 0.38,
+    0,
+    Math.PI * 2
+  );
+
+  ctx.fill();
+
+  /*
+    Eye sockets.
+  */
+  ctx.fillStyle =
+    "#09070a";
+
+  ctx.beginPath();
+
+  ctx.arc(
+    centerX -
+      size * 0.14,
+    centerY -
+      size * 0.05,
+    size * 0.08,
+    0,
+    Math.PI * 2
+  );
+
+  ctx.fill();
+
+  ctx.beginPath();
+
+  ctx.arc(
+    centerX +
+      size * 0.14,
+    centerY -
+      size * 0.05,
+    size * 0.08,
+    0,
+    Math.PI * 2
+  );
+
+  ctx.fill();
+
+  /*
+    Little skull nose.
+  */
+  ctx.fillRect(
+    centerX -
+      size * 0.04,
+    centerY +
+      size * 0.08,
+    size * 0.08,
+    size * 0.09
+  );
+}
+
+
+/* ================================
+   PUMPKIN FOOD
+================================ */
+
+function drawSnakePumpkin(
+  ctx,
+  x,
+  y,
+  size
+) {
+
+  const centerX =
+    x * size +
+    size / 2;
+
+  const centerY =
+    y * size +
+    size / 2;
+
+  ctx.fillStyle =
+    "#ff7518";
+
+  ctx.beginPath();
+
+  ctx.arc(
+    centerX,
+    centerY +
+      size * 0.05,
+    size * 0.32,
+    0,
+    Math.PI * 2
+  );
+
+  ctx.fill();
+
+  ctx.fillStyle =
+    "#6e9b45";
+
+  ctx.fillRect(
+    centerX -
+      size * 0.05,
+    centerY -
+      size * 0.38,
+    size * 0.1,
+    size * 0.2
+  );
+
+  /*
+    Tiny jack-o-lantern eyes.
+  */
+  ctx.fillStyle =
+    "#3a1908";
+
+  ctx.fillRect(
+    centerX -
+      size * 0.16,
+    centerY,
+    size * 0.07,
+    size * 0.07
+  );
+
+  ctx.fillRect(
+    centerX +
+      size * 0.09,
+    centerY,
+    size * 0.07,
+    size * 0.07
   );
 }
 
@@ -1290,9 +2300,18 @@ function moveMazePlayer(
    KEYBOARD CONTROLS
 ================================ */
 
+
+
 document.addEventListener(
   "keydown",
   (event) => {
+
+    if (
+  activeSnakeGame &&
+  activeSnakeGame.running
+) {
+  return;
+}
 
     if (
       activeMaze === null
@@ -1334,6 +2353,51 @@ document.addEventListener(
   }
 );
 
+document.addEventListener(
+  "keydown",
+  (event) => {
+
+    if (
+      !activeSnakeGame ||
+      !activeSnakeGame.running
+    ) {
+      return;
+    }
+
+    const keyMap = {
+      ArrowUp: "up",
+      w: "up",
+      W: "up",
+
+      ArrowDown: "down",
+      s: "down",
+      S: "down",
+
+      ArrowLeft: "left",
+      a: "left",
+      A: "left",
+
+      ArrowRight: "right",
+      d: "right",
+      D: "right"
+    };
+
+    const direction =
+      keyMap[event.key];
+
+    if (!direction) {
+      return;
+    }
+
+    event.preventDefault();
+
+    changeSnakeDirection(
+      activeSnakeGame,
+      direction
+    );
+  }
+);
+
 /* ================================
    FORM
 ================================ */
@@ -1354,7 +2418,10 @@ quizForm.addEventListener(
       /*
         Maze questions
       */
-      if (question.type === "maze") {
+      if (
+  question.type === "maze" ||
+  question.type === "snake"
+) {
 
         if (
           progress.mazes[
@@ -1372,6 +2439,10 @@ quizForm.addEventListener(
         document.querySelector(
           `#question-${question.number}`
         );
+
+      if (!input) {
+        return;
+      }
 
       const feedback =
         input.parentElement.querySelector(
