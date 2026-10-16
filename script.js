@@ -151,7 +151,7 @@ const correctAnswers = {
 
   15: ["Purple"],
 
-  16: ["Dorian A Sirna"],
+  16: ["Dorian Sirna"],
 
   17: ["4", "four"],
   18: ["5", "five"],
