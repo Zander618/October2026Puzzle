@@ -153,7 +153,7 @@ const correctAnswers = {
 
   16: ["Dorian Sirna"],
 
-  17: ["4", "four"],
+  17: ["5", "five"],
   18: ["5", "five"],
 
   // 19 = maze
