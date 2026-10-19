@@ -392,6 +392,97 @@ body {
 }
 
 /* =========================
+   ZOFRAN CHASE MINI GAME
+========================= */
+
+.pacman-hud {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+
+  margin-bottom: 12px;
+  padding: 8px 10px;
+
+  background: rgba(255, 117, 24, 0.06);
+
+  border: 1px solid rgba(255, 117, 24, 0.2);
+  border-radius: 5px;
+
+  color: #d8cedb;
+
+  font-size: 0.82rem;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+}
+
+.pacman-canvas {
+  display: block;
+
+  width: 100%;
+  max-width: 380px;
+  height: auto;
+
+  background: #070509;
+
+  border: 2px solid #65456d;
+  border-radius: 4px;
+
+  image-rendering: pixelated;
+
+  outline: none;
+
+  touch-action: manipulation;
+
+  box-shadow:
+    0 0 20px rgba(145, 72, 162, 0.14);
+}
+
+.pacman-canvas:focus {
+  border-color: #ff7518;
+
+  box-shadow:
+    0 0 0 2px rgba(255, 117, 24, 0.12),
+    0 0 20px rgba(255, 117, 24, 0.15);
+}
+
+.pacman-start {
+  display: block;
+
+  width: 150px;
+
+  margin: 14px auto 0;
+  padding: 11px 14px;
+
+  background: #ff7518;
+
+  border: none;
+  border-radius: 5px;
+
+  color: #140b08;
+
+  font-size: 0.85rem;
+  font-weight: bold;
+  text-transform: uppercase;
+
+  cursor: pointer;
+
+  touch-action: manipulation;
+
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.pacman-start:hover {
+  background: #ff8c38;
+}
+
+.pacman-start:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+
+/* =========================
    MAIN BUTTON
 ========================= */
 
