@@ -51,8 +51,8 @@ const correctAnswers = {
   13: ["The Idiot"],
   14: ["Texas Chain Saw Massacre"],
   15: ["Purple"],
-  16: ["Dorian A Sirna"],
-  17: ["4", "four"],
+  16: ["Dorian Sirna"],
+  17: ["5", "five"],
   18: ["5", "five"],
 
   // 19 = Zofran chase
@@ -3444,20 +3444,15 @@ function movePacmanEnemies(
   game
 ) {
 
-  game.enemies.forEach(
-    (
-      enemy,
-      index
-    ) => {
+  // Embryos only move every other tick
+  if (
+    game.tickCount % 2 !== 0
+  ) {
+    return;
+  }
 
-      if (
-        index === 3 &&
-        game.tickCount %
-          2 ===
-          1
-      ) {
-        return;
-      }
+  game.enemies.forEach(
+    (enemy) => {
 
       enemy.direction =
         chooseEnemyDirection(
