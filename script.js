@@ -2925,14 +2925,6 @@ function createPacmanGame(
       x: 10,
       y: 11
     },
-    {
-      x: 8,
-      y: 8
-    },
-    {
-      x: 10,
-      y: 8
-    }
   ];
 
   const blocked =
