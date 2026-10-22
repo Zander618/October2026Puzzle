@@ -2885,7 +2885,7 @@ function buildPacmanPills(
       }
 
       if (
-        (x + y) % 2 === 0
+        (x + y) % 3 === 0
       ) {
 
         pills.add(
