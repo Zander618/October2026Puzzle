@@ -23,7 +23,7 @@ const questions = [
   { number: 22, text: "One is not like the others under my many arms that have grown since I left my house of food. The color?" },
   { number: 23, text: "Unearth the mystery of the red stone" },
   { number: 24, text: "Find em weekend: How many snakes are there?" },
-  { number: 25, text: "Find em weekend: How many skeletons are there?" },
+  { number: 25, text: "Find em weekend: How many skeletons are there(in the house / not the basement)?" },
   { number: 26, type: "maze", text: "Monday mini game" },
   { number: 27, text: "Trivia Tuesday: The book of the dead?" },
   { number: 28, text: "Word scramble: Comedy = Dmegastha" },
@@ -61,8 +61,8 @@ const correctAnswers = {
   21: ["Cenobites"],
   22: ["Red"],
   23: ["Big Head"],
-  24: ["4", "four"],
-  25: ["12", "twelve"],
+  24: ["5", "five"],
+  25: ["9", "nine"],
 
   // 26 = maze
 
