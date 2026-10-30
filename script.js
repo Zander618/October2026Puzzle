@@ -24,7 +24,7 @@ const questions = [
   { number: 23, text: "Unearth the mystery of the red stone" },
   { number: 24, text: "Find em weekend: How many snakes are there?" },
   { number: 25, text: "Find em weekend: How many skeletons are there(in the house / not the basement)?" },
-  { number: 26, type: "maze", text: "Monday mini game" },
+  { number: 26, type: "matching", text: "Monday mini game" },
   { number: 27, text: "Trivia Tuesday: The book of the dead?" },
   { number: 28, text: "Word scramble: Comedy = Dmegastha" },
   { number: 29, text: "Word scramble: 90s horror = Tfeahultcy" },
@@ -204,7 +204,8 @@ function isMiniGame(question) {
   return (
     question.type === "maze" ||
     question.type === "snake" ||
-    question.type === "pacman"
+    question.type === "pacman" ||
+    question.type === "matching"
   );
 }
 
@@ -356,20 +357,28 @@ function renderAvailableQuestions() {
         question
       );
 
-    } else if (
-      question.type === "pacman"
-    ) {
+} else if (
+  question.type === "pacman"
+) {
 
-      renderPacmanQuestion(
-        question
-      );
+  renderPacmanQuestion(
+    question
+  );
 
-    } else {
+} else if (
+  question.type === "matching"
+) {
 
-      renderTextQuestion(
-        question
-      );
-    }
+  renderMatchingQuestion(
+    question
+  );
+
+} else {
+
+  renderTextQuestion(
+    question
+  );
+}
   }
 
   updateProgressDisplay();
@@ -4192,6 +4201,551 @@ function drawGlassesHero(
   );
 
   ctx.fill();
+}
+
+/* ================================
+   MEMORY MATCHING MINI GAME
+================================ */
+
+const matchingCharacters = [
+  {
+    id: "bat",
+    icon: "🦇",
+    label: "Bat"
+  },
+  {
+    id: "ghost",
+    icon: "👻",
+    label: "Ghost"
+  },
+  {
+    id: "zombie",
+    icon: "🧟",
+    label: "Zombie"
+  },
+  {
+    id: "vampire",
+    icon: "🧛",
+    label: "Vampire"
+  },
+  {
+    id: "mummy",
+    icon: "⚱️",
+    label: "Mummy"
+  },
+  {
+    id: "snake",
+    icon: "🐍",
+    label: "Snake"
+  },
+  {
+    id: "frankenstein",
+    icon: "⚡",
+    label: "Frankenstein"
+  },
+  {
+    id: "creature",
+    icon: "🐟",
+    label: "Black Lagoon"
+  },
+  {
+    id: "skeleton",
+    icon: "💀",
+    label: "Skeleton"
+  },
+  {
+    id: "devil",
+    icon: "😈",
+    label: "Devil"
+  }
+];
+
+function createMatchingDeck(
+  questionNumber
+) {
+
+  const deck = [];
+
+  matchingCharacters.forEach(
+    (character) => {
+
+      deck.push({
+        ...character,
+        cardId:
+          `${character.id}-1`
+      });
+
+      deck.push({
+        ...character,
+        cardId:
+          `${character.id}-2`
+      });
+    }
+  );
+
+  /*
+    Deterministic shuffle:
+    question 26 always gets the
+    same arrangement after refresh.
+  */
+
+  const random =
+    seededRandom(
+      20261026 +
+      questionNumber * 313
+    );
+
+  for (
+    let i =
+      deck.length - 1;
+    i > 0;
+    i--
+  ) {
+
+    const j =
+      Math.floor(
+        random() *
+        (i + 1)
+      );
+
+    [
+      deck[i],
+      deck[j]
+    ] = [
+      deck[j],
+      deck[i]
+    ];
+  }
+
+  return deck;
+}
+
+function renderMatchingQuestion(
+  question
+) {
+
+  const section =
+    document.createElement(
+      "section"
+    );
+
+  section.className =
+    "question maze-question matching-question";
+
+  const title =
+    document.createElement(
+      "div"
+    );
+
+  title.className =
+    "question-title";
+
+  const number =
+    document.createElement(
+      "span"
+    );
+
+  number.className =
+    "question-number";
+
+  number.textContent =
+    String(
+      question.number
+    ).padStart(
+      2,
+      "0"
+    );
+
+  title.appendChild(
+    number
+  );
+
+  title.appendChild(
+    document.createTextNode(
+      question.text
+    )
+  );
+
+  const instructions =
+    document.createElement(
+      "p"
+    );
+
+  instructions.className =
+    "maze-instructions";
+
+  instructions.textContent =
+    "Find all 10 spooky pairs. Flip one card, then choose one card to find its match. A wrong pair flips back over.";
+
+  const status =
+    document.createElement(
+      "p"
+    );
+
+  status.className =
+    "maze-status matching-status";
+
+  const completed =
+    Boolean(
+      progress.mazes[
+        question.number
+      ]
+    );
+
+  const board =
+    document.createElement(
+      "div"
+    );
+
+  board.className =
+    "matching-board";
+
+  const deck =
+    createMatchingDeck(
+      question.number
+    );
+
+  let firstCard =
+    null;
+
+  let secondCard =
+    null;
+
+  let matchedPairs =
+    completed
+      ? 10
+      : 0;
+
+  let boardLocked =
+    false;
+
+  function updateMatchingStatus() {
+
+    if (
+      matchedPairs === 10
+    ) {
+
+      status.textContent =
+        "All 10 pairs matched! 🎃";
+
+      status.classList.add(
+        "completed"
+      );
+
+    } else {
+
+      status.textContent =
+        `Pairs matched: ${matchedPairs} / 10`;
+    }
+  }
+
+  function showCard(
+    button
+  ) {
+
+    button.classList.add(
+      "flipped"
+    );
+
+    button.setAttribute(
+      "aria-pressed",
+      "true"
+    );
+  }
+
+  function hideCard(
+    button
+  ) {
+
+    button.classList.remove(
+      "flipped"
+    );
+
+    button.setAttribute(
+      "aria-pressed",
+      "false"
+    );
+  }
+
+  function finishMatchingGame() {
+
+    progress.mazes[
+      question.number
+    ] = true;
+
+    saveProgress();
+
+    status.textContent =
+      "All 10 pairs matched! You survived the monster deck. 🎃";
+
+    status.classList.add(
+      "completed"
+    );
+
+    revealNextQuestionIfAllowed(
+      question.number,
+      700
+    );
+  }
+
+  deck.forEach(
+    (card) => {
+
+      const button =
+        document.createElement(
+          "button"
+        );
+
+      button.type =
+        "button";
+
+      button.className =
+        "matching-card";
+
+      button.dataset.matchId =
+        card.id;
+
+      button.setAttribute(
+        "aria-label",
+        "Face-down matching card"
+      );
+
+      button.setAttribute(
+        "aria-pressed",
+        "false"
+      );
+
+      const inner =
+        document.createElement(
+          "span"
+        );
+
+      inner.className =
+        "matching-card-inner";
+
+      const back =
+        document.createElement(
+          "span"
+        );
+
+      back.className =
+        "matching-card-back";
+
+      back.textContent =
+        "🎃";
+
+      const face =
+        document.createElement(
+          "span"
+        );
+
+      face.className =
+        "matching-card-face";
+
+      const icon =
+        document.createElement(
+          "span"
+        );
+
+      icon.className =
+        "matching-card-icon";
+
+      icon.textContent =
+        card.icon;
+
+      const label =
+        document.createElement(
+          "span"
+        );
+
+      label.className =
+        "matching-card-label";
+
+      label.textContent =
+        card.label;
+
+      face.appendChild(
+        icon
+      );
+
+      face.appendChild(
+        label
+      );
+
+      inner.appendChild(
+        back
+      );
+
+      inner.appendChild(
+        face
+      );
+
+      button.appendChild(
+        inner
+      );
+
+      if (
+        completed
+      ) {
+
+        button.classList.add(
+          "flipped",
+          "matched"
+        );
+
+        button.disabled =
+          true;
+      }
+
+      button.addEventListener(
+        "click",
+        () => {
+
+          if (
+            completed ||
+            boardLocked ||
+            button.classList.contains(
+              "matched"
+            ) ||
+            button === firstCard
+          ) {
+            return;
+          }
+
+          showCard(
+            button
+          );
+
+          /*
+            First selection.
+          */
+
+          if (
+            !firstCard
+          ) {
+
+            firstCard =
+              button;
+
+            status.textContent =
+              "Now find its match...";
+
+            return;
+          }
+
+          /*
+            Second selection.
+          */
+
+          secondCard =
+            button;
+
+          boardLocked =
+            true;
+
+          const match =
+            firstCard.dataset.matchId ===
+            secondCard.dataset.matchId;
+
+          if (
+            match
+          ) {
+
+            firstCard.classList.add(
+              "matched"
+            );
+
+            secondCard.classList.add(
+              "matched"
+            );
+
+            firstCard.disabled =
+              true;
+
+            secondCard.disabled =
+              true;
+
+            matchedPairs++;
+
+            firstCard =
+              null;
+
+            secondCard =
+              null;
+
+            boardLocked =
+              false;
+
+            updateMatchingStatus();
+
+            if (
+              matchedPairs === 10
+            ) {
+
+              finishMatchingGame();
+            }
+
+          } else {
+
+            status.textContent =
+              "No match! Those cards are going back into the darkness...";
+
+            setTimeout(
+              () => {
+
+                hideCard(
+                  firstCard
+                );
+
+                hideCard(
+                  secondCard
+                );
+
+                firstCard =
+                  null;
+
+                secondCard =
+                  null;
+
+                boardLocked =
+                  false;
+
+                updateMatchingStatus();
+
+              },
+              850
+            );
+          }
+        }
+      );
+
+      board.appendChild(
+        button
+      );
+    }
+  );
+
+  section.appendChild(
+    title
+  );
+
+  section.appendChild(
+    instructions
+  );
+
+  section.appendChild(
+    board
+  );
+
+  section.appendChild(
+    status
+  );
+
+  questionsContainer.appendChild(
+    section
+  );
+
+  updateMatchingStatus();
 }
 
 /* ================================
