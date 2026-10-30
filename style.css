@@ -761,3 +761,69 @@ button:active {
     font-size: 0.46rem;
   }
 }
+
+/* =========================
+   FINAL ENCRYPTED CLUE
+========================= */
+
+.final-clue {
+  margin-top: 20px;
+  padding: 18px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(46, 26, 52, 0.95),
+      rgba(18, 12, 21, 0.95)
+    );
+
+  border:
+    1px solid #65456d;
+
+  border-radius: 7px;
+
+  box-shadow:
+    0 8px 24px
+      rgba(0, 0, 0, 0.25);
+}
+
+.final-clue-message {
+  margin:
+    0 0 15px;
+
+  color: #ff9a51;
+
+  font-family:
+    Georgia,
+    serif;
+
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.final-clue-code {
+  margin: 0;
+  padding: 14px;
+
+  background: #0d090f;
+
+  border:
+    1px solid #45364b;
+
+  border-radius: 4px;
+
+  color: #eee7ef;
+
+  font-family:
+    "Courier New",
+    monospace;
+
+  font-size: 0.8rem;
+  line-height: 1.7;
+
+  white-space:
+    pre-wrap;
+
+  overflow-wrap:
+    anywhere;
+}

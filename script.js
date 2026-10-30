@@ -463,6 +463,133 @@ function renderTextQuestion(
   feedback.className =
     "answer-feedback";
 
+  /*
+    Final encrypted clue.
+    This is only created for question 30.
+  */
+
+  let finalClue =
+    null;
+
+  let finalCode =
+    null;
+
+  if (
+    question.number === 30
+  ) {
+
+    finalClue =
+      document.createElement(
+        "div"
+      );
+
+    finalClue.className =
+      "final-clue";
+
+    finalClue.hidden =
+      true;
+
+    const message =
+      document.createElement(
+        "p"
+      );
+
+    message.className =
+      "final-clue-message";
+
+    message.textContent =
+      "So you chose this path. Decrypt the code to find the prize.";
+
+    finalCode =
+      document.createElement(
+        "pre"
+      );
+
+    finalCode.className =
+      "final-clue-code";
+
+    finalClue.appendChild(
+      message
+    );
+
+    finalClue.appendChild(
+      finalCode
+    );
+  }
+
+  function updateFinalClue() {
+
+    if (
+      question.number !== 30 ||
+      !finalClue ||
+      !finalCode
+    ) {
+      return;
+    }
+
+    const normalized =
+      normalizeAnswer(
+        input.value
+      );
+
+    /*
+      DEAD ALIVE
+      =
+      LOOK UNDERNEATH THE CRIB
+    */
+
+    if (
+      normalized ===
+      "deadalive"
+    ) {
+
+      finalClue.hidden =
+        false;
+
+      finalCode.textContent =
+`1(2) 1(4) 1(4) 3(10)
+15(2) 21(3) 13(5) 1(1) 22(1) 21(3) 1(1) 2(6) 13(1) 13(2)
+13(1) 13(2) 1(1)
+21(1) 22(1) 13(4) 7(4)`;
+
+      return;
+    }
+
+    /*
+      EVIL DEAD
+      =
+      LOOK UNDERNEATH THE BED
+    */
+
+    if (
+      normalized ===
+      "evildead"
+    ) {
+
+      finalClue.hidden =
+        false;
+
+      finalCode.textContent =
+`1(2) 1(4) 1(4) 3(10)
+15(2) 21(3) 13(5) 1(1) 22(1) 21(3) 1(1) 2(6) 13(1) 13(2)
+13(1) 13(2) 1(1)
+7(4) 1(1) 13(5)`;
+
+      return;
+    }
+
+    /*
+      Hide the clue if the answer
+      is changed to something else.
+    */
+
+    finalClue.hidden =
+      true;
+
+    finalCode.textContent =
+      "";
+  }
+
   input.addEventListener(
     "input",
     () => {
@@ -473,6 +600,8 @@ function renderTextQuestion(
         input.value;
 
       saveProgress();
+
+      updateFinalClue();
 
       if (
         isAnswerCorrect(
@@ -500,9 +629,32 @@ function renderTextQuestion(
     feedback
   );
 
+  /*
+    Put the encrypted clue directly
+    underneath question 30.
+  */
+
+  if (
+    finalClue
+  ) {
+
+    section.appendChild(
+      finalClue
+    );
+  }
+
   questionsContainer.appendChild(
     section
   );
+
+  /*
+    Important:
+    If question 30 was already answered
+    and the page is refreshed, show the
+    correct clue again immediately.
+  */
+
+  updateFinalClue();
 }
 
 /* ================================
