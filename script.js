@@ -517,78 +517,115 @@ function renderTextQuestion(
     );
   }
 
-  function updateFinalClue() {
+ function updateFinalClue() {
 
-    if (
-      question.number !== 30 ||
-      !finalClue ||
-      !finalCode
-    ) {
-      return;
-    }
+  if (
+    question.number !== 30 ||
+    !finalClue ||
+    !finalCode
+  ) {
+    return;
+  }
 
-    const normalized =
-      normalizeAnswer(
-        input.value
-      );
+  const normalized =
+    normalizeAnswer(
+      input.value
+    );
 
-    /*
-      DEAD ALIVE
-      =
-      LOOK UNDERNEATH THE CRIB
-    */
+  const validFinalAnswer =
+    normalized === "deadalive" ||
+    normalized === "evildead";
 
-    if (
-      normalized ===
-      "deadalive"
-    ) {
+  /*
+    If question 30 is not answered
+    correctly, show nothing.
+  */
 
-      finalClue.hidden =
-        false;
-
-      finalCode.textContent =
-`1(2) 1(4) 1(4) 3(10)
-15(2) 21(3) 13(5) 1(1) 22(1) 21(3) 1(1) 2(6) 13(1) 13(2)
-13(1) 13(2) 1(1)
-21(1) 22(1) 13(4) 7(4)`;
-
-      return;
-    }
-
-    /*
-      EVIL DEAD
-      =
-      LOOK UNDERNEATH THE BED
-    */
-
-    if (
-      normalized ===
-      "evildead"
-    ) {
-
-      finalClue.hidden =
-        false;
-
-      finalCode.textContent =
-`1(2) 1(4) 1(4) 3(10)
-15(2) 21(3) 13(5) 1(1) 22(1) 21(3) 1(1) 2(6) 13(1) 13(2)
-13(1) 13(2) 1(1)
-7(4) 1(1) 13(5)`;
-
-      return;
-    }
-
-    /*
-      Hide the clue if the answer
-      is changed to something else.
-    */
+  if (
+    !validFinalAnswer
+  ) {
 
     finalClue.hidden =
       true;
 
     finalCode.textContent =
       "";
+
+    return;
   }
+
+  /*
+    Question 30 is correct,
+    but the final clue is locked
+    until October 31.
+  */
+
+  finalClue.hidden =
+    false;
+
+  const message =
+    finalClue.querySelector(
+      ".final-clue-message"
+    );
+
+  if (
+    !hasQuestionDateArrived(31)
+  ) {
+
+    message.textContent =
+      "Return on the 31st for the final clue.";
+
+    finalCode.textContent =
+      "";
+
+    return;
+  }
+
+  /*
+    October 31 has arrived.
+  */
+
+  message.textContent =
+    "So you chose this path. Decrypt the code to find the prize.";
+
+  /*
+    DEAD ALIVE
+    =
+    LOOK UNDERNEATH THE CRIB
+  */
+
+  if (
+    normalized ===
+    "deadalive"
+  ) {
+
+    finalCode.textContent =
+`1(2) 1(4) 1(4) 3[10]
+15(2) 21(3) 13(5) 1(1) 22(1) 21(3) 1(1) 2(6) 13(1) 13(2)
+13(1) 13(2) 1(1)
+21(1) 22(1) 13(4) 7(4)`;
+
+    return;
+  }
+
+  /*
+    EVIL DEAD
+    =
+    LOOK UNDERNEATH THE BED
+  */
+
+  if (
+    normalized ===
+    "evildead"
+  ) {
+
+    finalCode.textContent =
+`1(2) 1(4) 1(4) 3[10]
+15(2) 21(3) 13(5) 1(1) 22(1) 21(3) 1(1) 2(6) 13(1) 13(2)
+13(1) 13(2) 1(1)
+7(4) 1(1) 13(5)`;
+  }
+}
 
   input.addEventListener(
     "input",
